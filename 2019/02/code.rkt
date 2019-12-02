@@ -39,17 +39,25 @@
       (run-program)
       (list-ref 0)))
 
+(define (find-noun-verb value)
+  (for*/fold ([n null]
+              [v null])
+             ([i (in-range 100)]
+              [j (in-range 100)])
+    (let ([r (gravity-assist input i j)])
+      (cond
+        [(eq? r value) (values i j)]
+        [else (values n v)]))))
+
+(define (final-calc n v)
+  (+ (* n 100) v))
+
+(module+ test
+  (check-equal? (final-calc 12 2) 1202))
+
 (define part1
   (gravity-assist input 12 2))
 
 (define part2
-  (let-values ([(noun verb)
-                (for*/fold ([noun null]
-                            [verb null])
-                           ([i (in-range 100)]
-                            [j (in-range 100)])
-                  (let ([v (gravity-assist input i j)])
-                    (cond
-                      [(eq? v 19690720) (values i j)]
-                      [else (values noun verb)])))])
-    (+ (* noun 100) verb)))
+  (let-values ([(n v) (find-noun-verb 19690720)])
+    (final-calc n v)))
