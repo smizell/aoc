@@ -150,9 +150,8 @@
     [_ #f]))
 
 (define (between? a b n)
-  (match-define (list c d) (sort (list a b) <))
-  (and (> n c)
-       (< n d)))
+  (match-let ([(list a b) (sort (list a b) <)])
+    (and (> n a) (< n b))))
 
 (module+ test
   (define y-line '((0 0) (10 0)))
