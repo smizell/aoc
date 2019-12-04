@@ -57,7 +57,7 @@
 
 (define (horizontal? line)
   (match line
-    [(list (list a y) (list b y)) #t]
+    [`((,a ,y) (,b ,y)) #t]
     [_ #f]))
 
 (define (vertical? line) (not (horizontal? line)))
@@ -108,14 +108,16 @@
                   ((8 5) (3 5))
                   ((3 5) (3 2)))))
 
-(define (manhattan-distance i1 i2)
+(define (crosses-from-inputs i1 i2)
   (let* ([c1 (parse-commands i1)]
          [c2 (parse-commands i2)]
          [l1 (commands->lines c1 '(0 0))]
-         [l2 (commands->lines c2 '(0 0))]
-         ; We don't allow crosses at '(0 0)
-         [crosses (remove '(0 0) (find-crosses l1 l2))])
-    (calc-shortest-distance crosses)))
+         [l2 (commands->lines c2 '(0 0))])
+    (remove '(0 0) (find-crosses l1 l2))))
+
+(define (manhattan-distance i1 i2)
+  (~> (crosses-from-inputs i1 i2)
+      (calc-shortest-distance)))
 
 (module+ test
   (check-equal? (manhattan-distance "R75,D30,R83,U83,L12,D49,R71,U7,L72"
