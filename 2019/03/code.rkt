@@ -1,7 +1,8 @@
 #lang racket
 
-(require rackunit
-         threading)
+(require threading)
+
+(module+ test (require rackunit))
 
 (define (parse-commands inputs)
   (~> inputs
