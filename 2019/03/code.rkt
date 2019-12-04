@@ -122,7 +122,7 @@
                   ((8 5) (3 5))
                   ((3 5) (3 2)))))
 
-(define (shortest-distance i1 i2)
+(define (manhattan-distance i1 i2)
   (let* ([c1 (parse-commands i1)]
          [c2 (parse-commands i2)]
          [l1 (commands->lines c1 '(0 0))]
@@ -131,13 +131,13 @@
     (calc-shortest-distance crosses)))
 
 (module+ test
-  (check-equal? (shortest-distance "R75,D30,R83,U83,L12,D49,R71,U7,L72"
+  (check-equal? (manhattan-distance "R75,D30,R83,U83,L12,D49,R71,U7,L72"
                                    "U62,R66,U55,R34,D71,R55,D58,R83")
                 159)
-  (check-equal? (shortest-distance "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51"
+  (check-equal? (manhattan-distance "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51"
                                    "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7")
                 135)
-  (check-equal? (shortest-distance "R8,U5,L5,D3" "U7,R6,D4,L4") 6))
+  (check-equal? (manhattan-distance "R8,U5,L5,D3" "U7,R6,D4,L4") 6))
 
 (define inputs
   (~>> "./input.txt"
@@ -146,4 +146,83 @@
        (string-split _ "\n")))
 
 (define (part1)
-  (shortest-distance (first inputs) (second inputs)))
+  (manhattan-distance (first inputs) (second inputs)))
+
+(define (point-on-line? line point)
+  (match (list line point)
+    ; Point on horizontal line where ys are the same
+    [`(((,lx1 ,y) (,lx2 ,y)) (,px ,y))
+     (is-between? lx1 lx2 px)]
+    ; Point on vertical line where xs are the same
+    [`(((,x ,ly1) (,x ,ly2)) (,x ,py))
+     (is-between? ly1 ly2 py)]
+    [_ #f]))
+
+(define (is-between? a b n)
+  (let* ([s (sort (list a b) <)]
+         [a (first s)]
+         [b (second s)])
+    (and (> n a)
+         (< n b))))
+
+(module+ test
+  (define y-line '((0 0) (10 0)))
+  (define x-line '((5 0) (5 4)))
+  (define p1 '(5 0))
+  (define p2 '(5 1))
+  (check-equal? (point-on-line? y-line p1) #t)
+  (check-equal? (point-on-line? y-line p2) #f)
+  (check-equal? (point-on-line? x-line p2) #t)
+  (check-equal? (point-on-line? x-line p1) #f))
+
+(define (distance-between a b)
+  (match (list a b)
+    [`((,x ,y1) (,x ,y2)) (abs (- y2 y1))]
+    [`((,x1 ,y) (,x2, y)) (abs (- x1 x2))]))
+
+(module+ test
+  (define p3 '(5 1))
+  (define p4 '(5 11))
+  (define p5 '(8 11))
+  (define p6 '(5 11))
+  (check-equal? (distance-between p3 p4) 10)
+  (check-equal? (distance-between p5 p6) 3))
+
+; Takes a line and point and returns an integer
+(define (distance-to-point ls p c)
+  (let ([l (first ls)]
+        [rls (rest ls)])
+    (cond
+      ; We're done if we make it to the point
+      [(point-on-line? l p)
+       (+ (distance-between (first l) p) c)]
+      [else
+       (+ (distance-between (first l) (second l))
+          (distance-to-point rls p c))])))
+
+(module+ test
+  (define ls1 (commands->lines '(("R" 8) ("U" 5) ("L" 5) ("D" 3)) '(0 0)))
+  (define ls2 (commands->lines '(("U" 7) ("R" 6) ("D" 4) ("L" 4)) '(0 0)))
+  (check-equal? (distance-to-point ls1 '(6 5) 0) 15)
+  (check-equal? (distance-to-point ls2 '(6 5) 0) 15))
+
+(define (signal-delay i1 i2)
+  (let* ([c1 (parse-commands i1)]
+         [c2 (parse-commands i2)]
+         [l1 (commands->lines c1 '(0 0))]
+         [l2 (commands->lines c2 '(0 0))]
+         [crosses (find-crosses l1 l2)])
+    (first (sort (map (lambda (c)
+                        (let ([d1 (distance-to-point l1 c 0)]
+                              [d2 (distance-to-point l2 c 0)])
+                          (+ d1 d2)))
+                      crosses)
+                 <))))
+
+(module+ test
+  (check-equal? (signal-delay "R75,D30,R83,U83,L12,D49,R71,U7,L72"
+                                   "U62,R66,U55,R34,D71,R55,D58,R83")
+                610))
+
+(define (part2)
+  (signal-delay (first inputs) (second inputs)))
