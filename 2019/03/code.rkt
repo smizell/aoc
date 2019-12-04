@@ -48,27 +48,12 @@
 ; Look for crosses based on a horizontal and vertical line
 (define (crosses? h v)
   (match (list h v)
-    ; Horizontal on 0 vs vertical on 0
-    ; Crossing at (0 0) doesn't count
-    [(list (list (list 0 ay1) (list 0 ay2))
-           (list (list bx1 0) (list bx2 0)))
-     (not (crosses-point? (list ay1 ay2) 0))]
-    ; Horizontal vs vertical
-    [(list (list (list ax1 ay) (list ax2 ay))
-           (list (list bx by1) (list bx by2)))
-     (and (crosses-point? (list by1 by2) ay)
-          (crosses-point? (list ax1 ax2) bx))]))
-
-(define (crosses-point? p y)
-  (let* ([p (sort p <)]
-         [p1 (first p)]
-         [p2 (second p)])
-    (and (< p1 y)
-         (> p2 y))))
+    [`(((,ax1 ,ay) (,ax2 ,ay)) ((,bx ,by1) (,bx ,by2)))
+     (and (is-between? by1 by2 ay)
+          (is-between? ax1 ax2 bx))]))
 
 (module+ test
-  (check-equal? (crosses? '((3 6) (5 6)) '((4 5) (4 7))) #t)
-  (check-equal? (crosses? '((0 -1) (0 3)) '((-2 0) (2 0))) #f))
+  (check-equal? (crosses? '((3 6) (5 6)) '((4 5) (4 7))) #t))
 
 (define (horizontal? line)
   (match line
@@ -128,7 +113,8 @@
          [c2 (parse-commands i2)]
          [l1 (commands->lines c1 '(0 0))]
          [l2 (commands->lines c2 '(0 0))]
-         [crosses (find-crosses l1 l2)])
+         ; We don't allow crosses at '(0 0)
+         [crosses (remove '(0 0) (find-crosses l1 l2))])
     (calc-shortest-distance crosses)))
 
 (module+ test
@@ -212,7 +198,7 @@
          [c2 (parse-commands i2)]
          [l1 (commands->lines c1 '(0 0))]
          [l2 (commands->lines c2 '(0 0))]
-         [crosses (find-crosses l1 l2)])
+         [crosses (remove '(0 0) (find-crosses l1 l2))])
     (first (sort (map (lambda (c)
                         (let ([d1 (distance-to-point l1 c 0)]
                               [d2 (distance-to-point l2 c 0)])
