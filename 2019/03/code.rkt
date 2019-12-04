@@ -13,8 +13,7 @@
   (check-equal? (parse-commands "R102,U50") '(("R" 102) ("U" 50))))
 
 (define (parse-command input)
-  (list (substring input 0 1)
-        (string->number (substring input 1))))
+  (list (substring input 0 1) (string->number (substring input 1))))
 
 (module+ test
   (check-equal? (parse-command "R102") '("R" 102)))
@@ -49,8 +48,7 @@
 (define (crosses? h v)
   (match (list h v)
     [`(((,ax1 ,ay) (,ax2 ,ay)) ((,bx ,by1) (,bx ,by2)))
-     (and (between? by1 by2 ay)
-          (between? ax1 ax2 bx))]))
+     (and (between? by1 by2 ay) (between? ax1 ax2 bx))]))
 
 (module+ test
   (check-equal? (crosses? '((3 6) (5 6)) '((4 5) (4 7))) #t))
@@ -142,11 +140,9 @@
 (define (point-on-line? line point)
   (match (list line point)
     ; Point on horizontal line where ys are the same
-    [`(((,lx1 ,y) (,lx2 ,y)) (,px ,y))
-     (between? lx1 lx2 px)]
+    [`(((,lx1 ,y) (,lx2 ,y)) (,px ,y)) (between? lx1 lx2 px)]
     ; Point on vertical line where xs are the same
-    [`(((,x ,ly1) (,x ,ly2)) (,x ,py))
-     (between? ly1 ly2 py)]
+    [`(((,x ,ly1) (,x ,ly2)) (,x ,py)) (between? ly1 ly2 py)]
     [_ #f]))
 
 (define (between? a b n)
