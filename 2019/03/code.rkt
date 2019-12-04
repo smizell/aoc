@@ -136,6 +136,9 @@
 (define (part1)
   (manhattan-distance (first inputs) (second inputs)))
 
+(module+ test
+  (check-equal? (part1) 870))
+
 (define (point-on-line? line point)
   (match (list line point)
     ; Point on horizontal line where ys are the same
@@ -147,11 +150,9 @@
     [_ #f]))
 
 (define (between? a b n)
-  (let* ([s (sort (list a b) <)]
-         [a (first s)]
-         [b (second s)])
-    (and (> n a)
-         (< n b))))
+  (match-define (list c d) (sort (list a b) <))
+  (and (> n c)
+       (< n d)))
 
 (module+ test
   (define y-line '((0 0) (10 0)))
@@ -214,3 +215,6 @@
 
 (define (part2)
   (signal-delay (first inputs) (second inputs)))
+
+(module+ test
+  (check-equal? (part2) 13698))
