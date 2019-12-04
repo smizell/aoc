@@ -20,23 +20,12 @@
 
 ; Convert a command like R5 to a line with beginning and end
 (define (command->line command cursor)
-  (match command
-    [(list "R" distance)
-     (let ([x (first cursor)]
-           [y (second cursor)])
-       (list cursor (list (+ x distance) y)))]
-    [(list "U" distance)
-     (let ([x (first cursor)]
-           [y (second cursor)])
-       (list cursor (list x (+ y distance))))]
-    [(list "L" distance)
-     (let ([x (first cursor)]
-           [y (second cursor)])
-       (list cursor (list (- x distance) y)))]
-    [(list "D" distance)
-     (let ([x (first cursor)]
-           [y (second cursor)])
-       (list cursor (list x (- y distance))))]))
+  (match-let ([(list x y) cursor])
+    (match command
+      [(list "R" distance) (list cursor (list (+ x distance) y))]
+      [(list "U" distance) (list cursor (list x (+ y distance)))]
+      [(list "L" distance) (list cursor (list (- x distance) y))]
+      [(list "D" distance) (list cursor (list x (- y distance)))])))
 
 (module+ test
   (check-equal? (command->line '("R" 3) '(0 0)) '((0 0) (3 0)))
@@ -118,10 +107,10 @@
 
 (module+ test
   (check-equal? (manhattan-distance "R75,D30,R83,U83,L12,D49,R71,U7,L72"
-                                   "U62,R66,U55,R34,D71,R55,D58,R83")
+                                    "U62,R66,U55,R34,D71,R55,D58,R83")
                 159)
   (check-equal? (manhattan-distance "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51"
-                                   "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7")
+                                    "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7")
                 135)
   (check-equal? (manhattan-distance "R8,U5,L5,D3" "U7,R6,D4,L4") 6))
 
@@ -205,7 +194,7 @@
 
 (module+ test
   (check-equal? (signal-delay "R75,D30,R83,U83,L12,D49,R71,U7,L72"
-                                   "U62,R66,U55,R34,D71,R55,D58,R83")
+                              "U62,R66,U55,R34,D71,R55,D58,R83")
                 610))
 
 (define (part2)
