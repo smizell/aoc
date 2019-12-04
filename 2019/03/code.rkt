@@ -49,8 +49,8 @@
 (define (crosses? h v)
   (match (list h v)
     [`(((,ax1 ,ay) (,ax2 ,ay)) ((,bx ,by1) (,bx ,by2)))
-     (and (is-between? by1 by2 ay)
-          (is-between? ax1 ax2 bx))]))
+     (and (between? by1 by2 ay)
+          (between? ax1 ax2 bx))]))
 
 (module+ test
   (check-equal? (crosses? '((3 6) (5 6)) '((4 5) (4 7))) #t))
@@ -85,7 +85,6 @@
   (check-equal? (find-crosses '(((3 6) (5 6))) '(((4 5) (4 7)))) '((4 6)))
   (check-equal? (find-crosses '(((4 5) (4 7))) '(((3 6) (5 6)))) '((4 6)))
   (check-equal? (find-crosses '(((2 5) (2 7))) '(((3 3) (5 3)))) '()))
-
 
 (define (calc-shortest-distance crosses)
   (first (sort (map (lambda (c) (+ (abs (first c)) (abs (second c)))) crosses) <)))
@@ -141,13 +140,13 @@
   (match (list line point)
     ; Point on horizontal line where ys are the same
     [`(((,lx1 ,y) (,lx2 ,y)) (,px ,y))
-     (is-between? lx1 lx2 px)]
+     (between? lx1 lx2 px)]
     ; Point on vertical line where xs are the same
     [`(((,x ,ly1) (,x ,ly2)) (,x ,py))
-     (is-between? ly1 ly2 py)]
+     (between? ly1 ly2 py)]
     [_ #f]))
 
-(define (is-between? a b n)
+(define (between? a b n)
   (let* ([s (sort (list a b) <)]
          [a (first s)]
          [b (second s)])
