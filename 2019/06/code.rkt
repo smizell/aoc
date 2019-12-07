@@ -4,6 +4,7 @@
 
 (module+ test (require rackunit))
 
+; Used a hash so I didn't have to add the same numbers over and over
 (define (count-orbits os t [r (make-hasheq)] [acc 0])
   (cond
     [(eq? t 'COM) acc]
@@ -48,3 +49,43 @@
       (map (lambda (l) (reverse (string-split l ")"))) _)
       (build-orbits)))
 
+(define (part1)
+  (total-orbits input))
+
+(define (orbits os t [r '()])
+  (match t
+    ['COM r]
+    [_ (let ([n (hash-ref os t)])
+         (orbits os n (append r (list n))))]))
+
+(module+ test
+  (define o2 (hasheq
+              'B 'COM
+              'C 'B
+              'D 'C
+              'E 'D
+              'F 'E
+              'G 'B
+              'H 'G
+              'I 'D
+              'J 'E
+              'K 'J
+              'L 'K
+              'YOU 'K
+              'SAN 'I))
+  (define you (orbits o2 'YOU))
+  (define san (orbits o2 'SAN))
+  (check-equal? san '(I D C B COM)))
+
+(define (transfers os f t)
+  (let* ([fos (orbits os f)]
+         [tos (orbits os t)])
+    (for/first ([o fos]
+                #:when (index-of tos o))
+      (+ (index-of fos o) (index-of tos o)))))
+
+(module+ test
+  (check-equal? (transfers o2 'YOU 'SAN) 4))
+
+(define (part2)
+  (transfers input 'YOU 'SAN))
