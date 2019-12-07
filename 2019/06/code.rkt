@@ -30,9 +30,10 @@
   (check-equal? (count-orbits o1 'L) 7))
 
 (define (total-orbits os)
-  (let* ([ks (hash-keys os)]
-         [t (map (lambda (k) (count-orbits os k)) ks)])
-    (apply + t)))
+  (~>> os
+       (hash-keys)
+       (map (lambda (k) (count-orbits os k)))
+       (apply +)))
 
 (module+ test
   (check-equal? (total-orbits o1) 42))
@@ -78,8 +79,8 @@
   (check-equal? san '(I D C B COM)))
 
 (define (transfers os f t)
-  (let* ([fos (orbits os f)]
-         [tos (orbits os t)])
+  (let ([fos (orbits os f)]
+        [tos (orbits os t)])
     (for/first ([o fos]
                 #:when (index-of tos o))
       (+ (index-of fos o) (index-of tos o)))))
