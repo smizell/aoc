@@ -1,7 +1,8 @@
 #lang racket
 
 (require threading
-         math/matrix)
+         math/matrix
+         racket/draw)
 
 (module+ test (require rackunit))
 
@@ -87,6 +88,11 @@
     [0 'black]
     [1 'white]))
 
+(define (number->ascii n)
+  (match n
+    [0 " "]
+    [1 "*"]))
+
 (define (layers->pixels ls)
   (let* ([xl (length (flatten (first ls)))]
          [yl (length ls)]
@@ -94,7 +100,7 @@
          [mls (list->matrix yl xl fls)]
          [tmls (matrix-transpose mls)]
          [tfls (matrix->list tmls)]
-         [nls (chop-up tfls 4)])
+         [nls (chop-up tfls yl)])
     nls))
 
 (define (find-color cs)
@@ -104,6 +110,12 @@
   (let* ([l (length pxs)]
          [ns (map find-color pxs)]
          [cs (map number->color ns)])
+    cs))
+
+(define (pixels->ascii pxs)
+  (let* ([l (length pxs)]
+         [ns (map find-color pxs)]
+         [cs (map number->ascii ns)])
     cs))
 
 (module+ test
@@ -119,3 +131,9 @@
   (check-equal? (layers->pixels l2) pxs)
   (check-equal? (pixels->colors (layers->pixels l2))
                 '(black white white black)))
+
+(define (part2)
+  (let ([a (pixels->ascii (layers->pixels ls))])
+    (for ([l (map string-join (chop-up a 25))])
+      (println l))))
+
