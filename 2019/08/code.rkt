@@ -34,21 +34,21 @@
 (define (match-count-zero ls)
   (count-match-layers (lambda (n) (eq? n 0)) ls))
 
-(define (largest-match-index mc)
+(define (smallest-match-index mc)
   (foldl (lambda (n idx r)
-           (if (> n r) (- idx 1) r))
+           (if (> n r) r idx))
          0
          mc
          (range (length mc))))
 
 (module+ test
-  (define l1 '(((0 2 0) (0 1 1)) ((0 0 1) (1 2 3)) ((1 1 1) (3 3 3))))
+  (define l1 '(((0 0 1) (1 2 3)) ((0 2 0) (0 1 1)) ((1 1 1) (3 3 3))))
   (define mc1 (match-count-zero l1))
-  (check-equal? (largest-match-index mc1) 0))
+  (check-equal? (smallest-match-index mc1) 2))
 
 (define (part1-values ls)
   (let* ([mc (match-count-zero ls)]
-         [idx (largest-match-index mc)]
+         [idx (smallest-match-index mc)]
          [l (list-ref ls idx)]
          [fl (flatten l)]
          [t1 (count-match (lambda (n) (eq? 1 n)) fl)]
@@ -57,7 +57,7 @@
 
 (module+ test
   (let-values ([(idx t1 t2) (part1-values l1)])
-    (check-equal? (list idx t1 t2) (list 0 2 1))))
+    (check-equal? (list idx t1 t2) (list 2 3 0))))
 
 (define input
   (string-trim (file->string "./input.txt")))
@@ -74,7 +74,7 @@
 
 (define ls (input->layers input 25 6))
 (define mc (match-count-zero ls))
-(define idx (largest-match-index mc))
+(define idx (smallest-match-index mc))
 
 (define (part1)
   (let-values ([(idx t1 t2) (part1-values (input->layers input 25 6))])
