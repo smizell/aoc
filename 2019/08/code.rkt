@@ -1,6 +1,7 @@
 #lang racket
 
-(require threading)
+(require threading
+         math/matrix)
 
 (module+ test (require rackunit))
 
@@ -79,3 +80,42 @@
 (define (part1)
   (let-values ([(idx t1 t2) (part1-values (input->layers input 25 6))])
     (* t1 t2)))
+
+
+(define (number->color n)
+  (match n
+    [0 'black]
+    [1 'white]))
+
+(define (layers->pixels ls)
+  (let* ([xl (length (flatten (first ls)))]
+         [yl (length ls)]
+         [fls (flatten ls)]
+         [mls (list->matrix yl xl fls)]
+         [tmls (matrix-transpose mls)]
+         [tfls (matrix->list tmls)]
+         [nls (chop-up tfls 4)])
+    nls))
+
+(define (find-color cs)
+  (findf (lambda (n) (or (eq? n 1) (eq? n 0))) cs))
+
+(define (pixels->colors pxs)
+  (let* ([l (length pxs)]
+         [ns (map find-color pxs)]
+         [cs (map number->color ns)])
+    cs))
+
+(module+ test
+  (define l2 '(((0 2)
+                (2 2))
+               ((1 1)
+                (2 2))
+               ((2 2)
+                (1 2))
+               ((0 0)
+                (0 0))))
+  (define pxs '((0 1 2 0) (2 1 2 0) (2 2 1 0) (2 2 2 0)))
+  (check-equal? (layers->pixels l2) pxs)
+  (check-equal? (pixels->colors (layers->pixels l2))
+                '(black white white black)))
