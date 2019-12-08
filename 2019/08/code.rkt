@@ -1,8 +1,7 @@
 #lang racket
 
 (require threading
-         math/matrix
-         racket/draw)
+         math/matrix)
 
 (module+ test (require rackunit))
 
