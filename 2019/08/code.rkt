@@ -35,12 +35,15 @@
   (count-match-layers (lambda (n) (eq? n 0)) ls))
 
 (define (largest-match-index mc)
-  (foldl (lambda (n r) (if (> r n) r n)) 0 mc))
+  (foldl (lambda (n idx r)
+           (if (> n r) (- idx 1) r))
+         0
+         mc
+         (range (length mc))))
 
 (module+ test
   (define l1 '(((0 2 0) (0 1 1)) ((0 0 1) (1 2 3)) ((1 1 1) (3 3 3))))
   (define mc1 (match-count-zero l1))
-  (println mc1)
   (check-equal? (largest-match-index mc1) 0))
 
 (define (part1-values ls)
