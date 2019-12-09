@@ -11,12 +11,12 @@
     [else (chop-up (drop l n) n (append acc (list (take l n))))]))
 
 (define (build-layers s x y)
-  (map (lambda (n) (chop-up n x)) (chop-up s (* x y))))
+  (chop-up s (* x y)))
 
 (module+ test
   (define n1 '(1 2 3 4 5 6 7 8 9 0 1 2))
   (check-equal? (build-layers n1 3 2)
-                '(((1 2 3) (4 5 6)) ((7 8 9) (0 1 2)))))
+                '((1 2 3 4 5 6) (7 8 9 0 1 2))))
 
 (define (count-match fn l)
   (length (filter fn l)))
@@ -35,17 +35,15 @@
 (define (match-count-zero ls)
   (count-match-layers (lambda (n) (eq? n 0)) ls))
 
+
 (define (smallest-match-index mc)
-  (foldl (lambda (n idx r)
-           (if (> n r) r idx))
-         0
-         mc
-         (range (length mc))))
+  (~>> (argmin identity mc)
+      (index-of mc)))
 
 (module+ test
-  (define l1 '(((0 0 1) (1 2 3)) ((0 2 0) (0 1 1)) ((1 1 1) (3 3 3))))
+  (define l1 '((0 0 1 1 2 3) (0 1 2 3 4 5 6) (0 2 0 0 1 1) (1 1 1 3 3 3)))
   (define mc1 (match-count-zero l1))
-  (check-equal? (smallest-match-index mc1) 2))
+  (check-equal? (smallest-match-index mc1) 3))
 
 (define (part1-values ls)
   (let* ([mc (match-count-zero ls)]
@@ -58,7 +56,7 @@
 
 (module+ test
   (let-values ([(idx t1 t2) (part1-values l1)])
-    (check-equal? (list idx t1 t2) (list 2 3 0))))
+    (check-equal? (list idx t1 t2) (list 3 3 0))))
 
 (define input
   (string-trim (file->string "./input.txt")))
@@ -71,7 +69,7 @@
        (build-layers _ x y)))
 
 (module+ test
-  (check-equal? (input->layers "123456789012" 3 2) '(((1 2 3) (4 5 6)) ((7 8 9) (0 1 2)))))
+  (check-equal? (input->layers "123456789012" 3 2) '((1 2 3 4 5 6) (7 8 9 0 1 2))))
 
 (define ls (input->layers input 25 6))
 (define mc (match-count-zero ls))
@@ -118,14 +116,10 @@
     cs))
 
 (module+ test
-  (define l2 '(((0 2)
-                (2 2))
-               ((1 1)
-                (2 2))
-               ((2 2)
-                (1 2))
-               ((0 0)
-                (0 0))))
+  (define l2 '((0 2 2 2)
+               (1 1 2 2)
+               (2 2 1 2)
+               (0 0 0 0)))
   (define pxs '((0 1 2 0) (2 1 2 0) (2 2 1 0) (2 2 2 0)))
   (check-equal? (layers->pixels l2) pxs)
   (check-equal? (pixels->colors (layers->pixels l2))
